@@ -1,7 +1,8 @@
 "use client";
-
+export const dynamic = "force-dynamic";
 import Link from "next/link";
 import { useParams } from "next/navigation";
+
 
 const STORES = [
   { name: "Épicerie Mamadou", rate: "4.8 • 1.2k", img: "https://i.pravatar.cc/150?img=12", desc: "Épicerie du quartier, fruits, légumes, poulet et produits frais tous les jours." },
