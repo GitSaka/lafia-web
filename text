@@ -1,0 +1,28 @@
+Voici ma recommandation.
+
+**Ce qui reste à l'accueil**
+Le **catalogue**, avec un petit bandeau en haut (une phrase qui explique Lafia et un bouton « Télécharger l'app »). Amazon, Jumia et Alibaba font ainsi : le visiteur voit des produits tout de suite. Trois raisons :
+- Quelqu'un qui arrive par un lien WhatsApp ou Google veut des produits, pas un long texte.
+- Google indexe mieux un accueil rempli de produits.
+- Ton bouton de téléchargement reste visible, sans prendre toute la page.
+
+**Les pages, et ce que chacune fait**
+
+| URL | Contenu | Pourquoi |
+|---|---|---|
+| `/` | Bandeau court + catalogue + recherche | Page d'entrée |
+| `/product/[id]` | Photos, prix, boutique, bouton **WhatsApp** du vendeur, bouton « Ouvrir dans l'app / Télécharger » | Le visiteur contacte le vendeur, puis installe |
+| `/store/[id]` | Boutique et ses produits | Partage de boutique |
+| `/about` | Ce que fait Lafia, comment ça marche, pour acheteurs et vendeurs | Explication complète, sans alourdir l'accueil |
+| `/download` | Télécharger l'APK, étapes d'installation | Une seule page à envoyer aux gens |
+| `/sell` | « Ouvre ta boutique gratuitement », avantages, étapes | Pour recruter des vendeurs |
+| `/x/[code]` | Redirige vers la fiche produit ou boutique | Liens de partage |
+| `/privacy`, `/delete-account` | Pages exigées par Google Play | |
+
+**Un changement par rapport à avant** : je passe `/sell` en phase 1. Tu vas sur le terrain pour recruter des boutiques, et cette page te donne un lien simple à envoyer à chaque vendeur.
+
+**Un point de vigilance** : le bouton WhatsApp montre le numéro du vendeur au public, y compris aux robots. Il faut que les vendeurs l'acceptent à l'inscription. Dis-moi si ton app l'affiche déjà.
+
+**Menu du site (en-tête)** : Accueil · À propos · Vendre · Télécharger.
+
+Si ça te va, je mets tout en document pour un développeur (pages, chemins, fichiers, ordre de travail). Ensuite on commence le code, fichier par fichier. Je mets le document en route ?
