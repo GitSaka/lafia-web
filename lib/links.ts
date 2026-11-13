@@ -19,6 +19,24 @@ export const CONTACT_URL =
   "https://wa.me/2290140033344?text=" +
   encodeURIComponent("Bonjour, j'ai une question sur Lafia Shop.");
 
+
+  // Numéro béninois -> format wa.me. Hypothèse : 10 chiffres (01XXXXXXXX)
+// ou 8 chiffres (ancien format). Renvoie null si le numéro est inutilisable.
+export function whatsappUrl(
+  phone: string | null | undefined,
+  text: string
+): string | null {
+  if (!phone) return null;
+  let d = phone.replace(/\D/g, "");
+  if (d.startsWith("00")) d = d.slice(2);
+  if (d.startsWith("229")) {
+    // déjà avec l'indicatif
+  } else if (d.length === 10) d = `229${d}`;
+  else if (d.length === 8) d = `22901${d}`;
+  else return null;
+  return `https://wa.me/${d}?text=${encodeURIComponent(text)}`;
+}
+
 // Pages du site
 export const getProductUrl = (id: string) => `${SITE_URL}/product/${id}`;
 export const getStoreUrl = (id: string) => `${SITE_URL}/store/${id}`;

@@ -5,9 +5,9 @@ export default function StoreCard({ s }: { s: StoreItem }) {
   return (
     <Link
       href={`/store/${s.id}`}
-      className="flex w-36 shrink-0 flex-col items-center rounded-2xl border border-line bg-white p-3 text-center"
+      className="flex w-[105px] shrink-0 flex-col items-center rounded-2xl border border-line bg-white p-2.5 text-center"
     >
-      <div className="h-14 w-14 overflow-hidden rounded-full bg-brand-soft">
+      <div className="h-14 w-14 overflow-hidden rounded-full border border-line bg-surface">
         {s.image ? (
           // eslint-disable-next-line @next/next/no-img-element
           <img
@@ -18,21 +18,16 @@ export default function StoreCard({ s }: { s: StoreItem }) {
             className="h-full w-full object-cover"
           />
         ) : (
-          <div className="flex h-full items-center justify-center text-xl font-bold text-brand-dark">
+          <div className="flex h-full items-center justify-center text-xl font-bold text-brand">
             {s.name.charAt(0).toUpperCase()}
           </div>
         )}
       </div>
-      <p className="mt-2 line-clamp-2 text-xs font-bold leading-tight">
-        {s.name}
-      </p>
+      <p className="mt-1.5 w-full truncate text-[11px] font-bold">{s.name}</p>
       {s.rating != null && (
-        <p className="mt-1 text-xs text-muted">
-          ★ {s.rating.toFixed(1)} · {s.reviewsCount}
+        <p className="mt-0.5 text-[10px] font-bold text-ink">
+          <span className="text-amber-500">★</span> {s.rating.toFixed(1)}
         </p>
-      )}
-      {s.marketName && (
-        <p className="mt-0.5 line-clamp-1 text-xs text-muted">{s.marketName}</p>
       )}
     </Link>
   );

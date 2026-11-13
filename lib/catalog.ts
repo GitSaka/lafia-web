@@ -231,6 +231,7 @@ type ProductDetailStoreRow = {
   shopPicture: string | null;
   isVerified: boolean | null;
   userId: string | null;
+  contactPhone: string | null;
   market: { name: string } | null;
   zone: { name: string } | null;
 };
@@ -285,6 +286,7 @@ export async function getProduct(id: string) {
         shopPicture: null as string | null,
         isVerified: false,
         userId: "",
+        contactPhone: "0140033344" as string | null,
         market: p.marketName ? { name: p.marketName } : null,
         zone: null as { name: string } | null,
       },
@@ -296,7 +298,7 @@ export async function getProduct(id: string) {
   const { data, error } = await supabase
     .from("Product")
     .select(
-      `id,title,priceFCFA,originalPriceFCFA,promoPriceFCFA,isOnPromotion,allowTranche,maxTranches,description,images,videoUrl,colors,sizes,stockQuantity,isAvailable,categoryId,views,likes,createdAt,store:Store!Product_storeId_fkey!inner(id,name,shopPicture,isVerified,userId,market:Market(name),zone:MarketZone(name))`
+      `id,title,priceFCFA,originalPriceFCFA,promoPriceFCFA,isOnPromotion,allowTranche,maxTranches,description,images,videoUrl,colors,sizes,stockQuantity,isAvailable,categoryId,views,likes,createdAt,store:Store!Product_storeId_fkey!inner(id,name,shopPicture,isVerified,userId,contactPhone,market:Market(name),zone:MarketZone(name))`
     )
     .eq("id", id)
     .maybeSingle();
@@ -338,6 +340,7 @@ export async function getProduct(id: string) {
           shopPicture: store.shopPicture ?? null,
           isVerified: Boolean(store.isVerified),
           userId: store.userId ?? "",
+           contactPhone: store.contactPhone ?? null,  
           market: store.market ?? null,
           zone: store.zone ?? null,
         }

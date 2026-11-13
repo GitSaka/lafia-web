@@ -4,6 +4,8 @@ import Image from "next/image";
 import ProductCard from "@/components/ProductCard";
 import { getProduct, searchProducts } from "@/lib/catalog";
 import { formatF } from "@/lib/format";
+import { notFound } from "next/navigation";
+import { SITE_URL, whatsappUrl } from "@/lib/links";
 
 export default function ProductPage(props: PageProps<"/product/[id]">) {
   return (
@@ -35,16 +37,7 @@ async function ProductContent({
   const { id } = await params;
   const product = await getProduct(id);
 
-  if (!product) {
-    return (
-      <div className="mx-auto max-w-7xl px-3 py-10 text-center">
-        <p className="font-bold">Produit introuvable.</p>
-        <Link href="/" className="font-bold text-brand underline">
-          Retour à l&apos;accueil
-        </Link>
-      </div>
-    );
-  }
+   if (!product) notFound();
 
   const { products: similar } = await searchProducts({
     cat: product.categoryId ?? undefined,
@@ -59,19 +52,21 @@ async function ProductContent({
       ? Math.round(((product.priceFCFA - price) / product.priceFCFA) * 100)
       : 0;
 
+    const photos = product.images.filter((u) => !u.includes(".mp4"));
   const gallery =
-    product.images?.length > 0
-      ? product.images
-      : product.image
-        ? [product.image]
-        : ["https://images.unsplash.com/photo-1526948128573-703ee1aeb6fa?w=800&q=80"];
-  const mainImage = gallery[0];
+    photos.length > 0 ? photos : product.image ? [product.image] : [];
+  const mainImage = gallery[0] ?? null;
+
+  const orderHref = whatsappUrl(
+    product.store?.contactPhone,
+    `Bonjour, je veux commander : ${product.title} (${formatF(price)})\n${SITE_URL}/product/${product.id}`,
+  );
 
   return (
     <div className="min-h-screen bg-[#f5f5f5] pb-24 lg:pb-10">
       <div className="mx-auto max-w-7xl px-2 sm:px-4 lg:px-6">
         {/* BREADCRUMB - comme Alibaba */}
-        <div className="flex items-center gap-2 py-3 text- text-muted">
+        <div className="flex items-center gap-2 py-3 text-xs text-muted">
           <Link href="/" className="font-bold hover:text-ink">
             ← Accueil
           </Link>
@@ -84,14 +79,20 @@ async function ProductContent({
           {/* GAUCHE : GALERIE */}
           <div className="p-2 sm:p-4">
             <div className="relative aspect-square w-full overflow-hidden rounded-xl bg-surface">
-              <Image
-                src={mainImage}
-                alt={product.title}
-                fill
-                unoptimized
-                priority
-                className="object-cover"
-              />
+              {mainImage ? (
+                <Image
+                  src={mainImage}
+                  alt={product.title}
+                  fill
+                  unoptimized
+                  priority
+                  className="object-cover"
+                />
+              ) : (
+                <div className="flex h-full items-center justify-center text-5xl">
+                  🖼️
+                </div>
+              )}
               {product.allowTranche && (
                 <span className="absolute right-3 top-3 rounded-full bg-emerald-500 px-3 py-1 text-xs font-bold text-white">
                   Tontine {product.maxTranches}j
@@ -128,7 +129,7 @@ async function ProductContent({
           {/* DROITE : INFOS - comme Alibaba */}
           <div className="flex flex-col p-3 sm:p-5 lg:border-l lg:border-line lg:p-6">
             {/* TITRE */}
-            <h1 className="text-lg font-bold leading-snug text-ink sm:text-2xl lg:text-">
+            <h1 className="text-lg font-bold leading-snug text-ink sm:text-2xl lg:text-3xl">
               {product.title}
             </h1>
 
@@ -141,7 +142,7 @@ async function ProductContent({
             {/* PRIX */}
             <div className="mt-4 rounded-xl bg-[#fff5f0] p-3 sm:p-4">
               <div className="flex flex-wrap items-baseline gap-2">
-                <span className="text- font-black text-price sm:text-3xl">
+                <span className="text-2xl font-black text-price sm:text-3xl">
                   {formatF(price)}
                 </span>
                 {promo && (
@@ -227,31 +228,18 @@ async function ProductContent({
                   📍 {product.store?.market?.name ?? "Marché"} • {product.store?.zone?.name ?? ""}
                 </p>
               </div>
-              <Link
-                href={`/store/${product.store?.id}`}
-                className="shrink-0 rounded-full bg-brand px-4 py-2 text-xs font-bold text-white"
-              >
-                Suivre
-              </Link>
+                            {product.store?.id && (
+                <Link
+                  href={`/store/${product.store.id}`}
+                  className="shrink-0 rounded-full bg-brand px-4 py-2 text-xs font-bold text-white"
+                >
+                  Voir
+                </Link>
+              )}
             </div>
 
-            {/* ACTIONS - desktop */}
-            <div className="mt-4 hidden grid-cols-2 gap-2 lg:grid">
-              <Link href="/download" className="rounded-full border border-line py-3 text-center text-sm font-bold">
-                Discuter
-              </Link>
-              <Link href="/download" className="rounded-full bg-ink py-3 text-center text-sm font-bold text-white">
-                Payer • {formatF(price)}
-              </Link>
-            </div>
-
-            {/* ACTION ROW */}
-            <div className="mt-4 grid grid-cols-4 divide-x divide-line rounded-xl border border-line bg-white">
-              {["♥ Like", "⭐ Avis", "WhatsApp", "↗ Partager"].map((a) => (
-                <button key={a} className="py-3 text-center text-xs font-bold text-muted">
-                  {a}
-                </button>
-              ))}
+            <div className="mt-4 hidden lg:block">
+              <OrderButton href={orderHref} />
             </div>
           </div>
         </div>
@@ -275,18 +263,44 @@ async function ProductContent({
 
       {/* BOTTOM BAR - mobile seulement, comme avant */}
       <div className="fixed inset-x-0 bottom-0 border-t border-line bg-white lg:hidden">
-        <div className="mx-auto flex max-w-7xl items-center gap-2 px-2 py-3 sm:px-4">
-          <Link href={`/store/${product.store?.id}`} className="flex-1 rounded-full border border-line py-3 text-center text-sm font-bold">
-            Boutique
-          </Link>
-          <Link href="/download" className="flex-1 rounded-full border border-line py-3 text-center text-sm font-bold">
-            Discuter
-          </Link>
-          <Link href="/download" className="flex-[1.3] rounded-full bg-ink py-3 text-center text-sm font-bold text-white">
-            Payer • {formatF(price)}
-          </Link>
+                <div className="mx-auto flex max-w-7xl items-center gap-2 px-2 py-3 sm:px-4">
+          {product.store?.id && (
+            <Link
+              href={`/store/${product.store.id}`}
+              className="flex-1 rounded-full border border-line py-3 text-center text-sm font-bold"
+            >
+              Boutique
+            </Link>
+          )}
+          <div className="flex-[1.6]">
+            <OrderButton href={orderHref} />
+          </div>
         </div>
       </div>
     </div>
+  );
+}
+
+
+function OrderButton({ href }: { href: string | null }) {
+  if (!href) {
+    return (
+      <Link
+        href="/download"
+        className="block rounded-full bg-ink py-3 text-center text-sm font-bold text-white"
+      >
+        Télécharger l&apos;app pour commander
+      </Link>
+    );
+  }
+  return (
+    <a
+      href={href}
+      target="_blank"
+      rel="noopener noreferrer"
+      className="block rounded-full bg-[#25D366] py-3 text-center text-sm font-bold text-white"
+    >
+      Commander sur WhatsApp
+    </a>
   );
 }

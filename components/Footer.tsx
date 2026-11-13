@@ -11,6 +11,7 @@ export default function Footer() {
 
         <nav className="mt-4 flex flex-wrap gap-x-5 gap-y-2 font-medium">
           <Link href="/about" className="hover:text-brand">À propos</Link>
+                    <Link href="/terms" className="hover:text-brand">Conditions</Link>
           <Link href="/sell" className="hover:text-brand">Vendre</Link>
           <Link href="/download" className="hover:text-brand">Télécharger</Link>
           <Link href="/privacy" className="hover:text-brand">Confidentialité</Link>
