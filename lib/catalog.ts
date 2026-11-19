@@ -347,3 +347,130 @@ export async function getProduct(id: string) {
       : null,
   };
 }
+
+export type StoreDetail = {
+  id: string;
+  name: string;
+  image: string | null;
+  isVerified: boolean;
+  isOpen: boolean;
+  contactPhone: string | null;
+  rating: number | null;
+  reviewsCount: number;
+  marketName: string | null;
+  zoneName: string | null;
+  products: ProductItem[];
+};
+
+type StoreDetailRow = {
+  id: string;
+  name: string;
+  shopPicture: string | null;
+  isVerified: boolean | null;
+  isOpen: boolean | null;
+  contactPhone: string | null;
+  rating: number | null;
+  reviewsCount: number | null;
+  market: { name: string } | null;
+  zone: { name: string } | null;
+};
+
+type StoreProductRow = {
+  id: string;
+  title: string;
+  priceFCFA: number;
+  originalPriceFCFA: number | null;
+  promoPriceFCFA: number | null;
+  isOnPromotion: boolean | null;
+  allowTranche: boolean | null;
+  images: string[] | null;
+  videoUrl: string | null;
+  videoThumbnailUrl: string | null;
+};
+
+export async function getStore(id: string): Promise<StoreDetail | null> {
+  "use cache";
+  cacheLife("minutes");
+
+  if (DEMO) {
+    const s = DEMO_STORES.find((x) => x.id === id);
+    if (!s) return null;
+    return {
+      id: s.id,
+      name: s.name,
+      image: s.image,
+      isVerified: false,
+      isOpen: true,
+      contactPhone: "0140033344",
+      rating: s.rating,
+      reviewsCount: s.reviewsCount,
+      marketName: s.marketName,
+      zoneName: null,
+      products: DEMO_PRODUCTS.filter((p) => p.storeId === s.id).slice(
+        0,
+        PAGE_SIZE,
+      ),
+    };
+  }
+
+  if (!UUID_RE.test(id)) return null;
+
+  const { data, error } = await supabase
+    .from("Store")
+    .select(
+      "id,name,shopPicture,isVerified,isOpen,contactPhone,rating,reviewsCount,market:Market(name),zone:MarketZone(name)",
+    )
+    .eq("id", id)
+    .maybeSingle();
+
+  if (error) console.error("getStore:", error.message);
+  if (error || !data) return null;
+  const s = data as unknown as StoreDetailRow;
+
+  const { data: prods, error: prodError } = await supabase
+    .from("Product")
+    .select(
+      "id,title,priceFCFA,originalPriceFCFA,promoPriceFCFA,isOnPromotion,allowTranche,images,videoUrl,videoThumbnailUrl",
+    )
+    .eq("storeId", id)
+    .eq("isAvailable", true)
+    .order("createdAt", { ascending: false })
+    .order("id", { ascending: true })
+    .limit(PAGE_SIZE);
+
+  if (prodError) console.error("getStore products:", prodError.message);
+
+  const marketName = s.market?.name ?? null;
+  const rows = (prods ?? []) as unknown as StoreProductRow[];
+
+  return {
+    id: s.id,
+    name: s.name,
+    image: s.shopPicture ?? null,
+    isVerified: Boolean(s.isVerified),
+    isOpen: Boolean(s.isOpen),
+    contactPhone: s.contactPhone ?? null,
+    rating: (s.reviewsCount ?? 0) > 0 ? s.rating : null,
+    reviewsCount: s.reviewsCount ?? 0,
+    marketName,
+    zoneName: s.zone?.name ?? null,
+    products: rows.map((r) => ({
+      id: r.id,
+      title: r.title,
+      priceFCFA: r.priceFCFA,
+      promoPriceFCFA: r.promoPriceFCFA,
+      isOnPromotion: Boolean(r.isOnPromotion),
+      originalPriceFCFA: r.originalPriceFCFA,
+      hasVideo:
+        Boolean(r.videoUrl) || Boolean(r.images?.[0]?.includes(".mp4")),
+      allowTranche: Boolean(r.allowTranche),
+      marketName,
+      image:
+        r.images?.find((u) => !u.includes(".mp4")) ??
+        r.videoThumbnailUrl ??
+        null,
+      storeId: s.id,
+      storeName: s.name,
+    })),
+  };
+}
