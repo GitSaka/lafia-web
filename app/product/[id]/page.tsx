@@ -32,7 +32,7 @@ export async function generateMetadata({
   const url = `${SITE_URL}/product/${product.id}`;
 
   return {
-    title: `${product.title} | Lafia Shop`,
+    title: product.title,
     description,
     openGraph: {
       title: product.title,
