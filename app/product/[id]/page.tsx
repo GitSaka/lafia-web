@@ -6,6 +6,52 @@ import { getProduct, searchProducts } from "@/lib/catalog";
 import { formatF } from "@/lib/format";
 import { notFound } from "next/navigation";
 import { SITE_URL, whatsappUrl } from "@/lib/links";
+import type { Metadata } from "next";
+
+
+export async function generateMetadata({
+  params,
+}: PageProps<"/product/[id]">): Promise<Metadata> {
+  const { id } = await params;
+  const product = await getProduct(id);
+  if (!product) return { title: "Produit introuvable" };
+
+  const promo = product.isOnPromotion && product.promoPriceFCFA != null;
+  const price = promo ? (product.promoPriceFCFA as number) : product.priceFCFA;
+
+  const description = [
+    formatF(price),
+    product.store?.name,
+    product.marketName ? `à ${product.marketName}` : null,
+  ]
+    .filter(Boolean)
+    .join(" · ");
+
+  const candidate = product.image ?? product.store?.shopPicture ?? null;
+  const image = candidate?.startsWith("http") ? candidate : null;
+  const url = `${SITE_URL}/product/${product.id}`;
+
+  return {
+    title: `${product.title} | Lafia Shop`,
+    description,
+    openGraph: {
+      title: product.title,
+      description,
+      url,
+      siteName: "Lafia Shop",
+      type: "website",
+      ...(image ? { images: [{ url: image }] } : {}),
+    },
+    twitter: {
+      card: image ? "summary_large_image" : "summary",
+      title: product.title,
+      description,
+      ...(image ? { images: [image] } : {}),
+    },
+  };
+}
+
+
 
 export default function ProductPage(props: PageProps<"/product/[id]">) {
   return (
