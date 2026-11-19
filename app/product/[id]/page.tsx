@@ -7,6 +7,7 @@ import { formatF } from "@/lib/format";
 import { notFound } from "next/navigation";
 import { SITE_URL, whatsappUrl } from "@/lib/links";
 import type { Metadata } from "next";
+import OpenInApp from "@/components/OpenInApp";
 
 
 export async function generateMetadata({
@@ -119,6 +120,11 @@ async function ProductContent({
           <span>/</span>
           <span className="truncate text-ink">{product.title}</span>
         </div>
+
+                <OpenInApp
+          path={`product/${product.id}`}
+          fallbackUrl={`${SITE_URL}/download`}
+        />
 
         {/* CARTE PRINCIPALE - 1 col mobile, 2 cols desktop */}
         <div className="overflow-hidden rounded-2xl bg-white shadow-sm lg:grid lg:grid-cols-[1.05fr_1fr]">

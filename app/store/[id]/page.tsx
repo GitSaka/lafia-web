@@ -6,6 +6,7 @@ import { notFound } from "next/navigation";
 import ProductCard from "@/components/ProductCard";
 import { getStore } from "@/lib/catalog";
 import { SITE_URL, whatsappUrl } from "@/lib/links";
+import OpenInApp from "@/components/OpenInApp";
 
 export async function generateMetadata({
   params,
@@ -87,6 +88,11 @@ async function StoreContent({
           <span>/</span>
           <span className="truncate text-ink">{store.name}</span>
         </div>
+
+                <OpenInApp
+          path={`store/${store.id}`}
+          fallbackUrl={`${SITE_URL}/download`}
+        />
 
         {/* EN-TÊTE BOUTIQUE */}
         <div className="rounded-2xl bg-white p-4 shadow-sm">
